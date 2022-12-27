@@ -3,6 +3,7 @@ use pyo3::prelude::*;
 
 /// Convenience function to register the rust logger with the Python logging instance.
 pub fn register() {
+    pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         // Extend the `logging` module to interact with log
         setup_logging(py)
