@@ -33,6 +33,8 @@ fn main() {
 
 ```
 [2022-12-27T15:26:12Z INFO  example_project] Just some normal information!
+
 [2022-12-27T15:26:12Z WARN  example_project] Something spooky happened!
+
 [2022-12-27T15:26:12Z ERROR example_application_py_logger] Something bad happened
 ```
