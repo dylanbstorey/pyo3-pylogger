@@ -2,18 +2,18 @@ use log::{logger, Level, MetadataBuilder, Record};
 use pyo3::prelude::*;
 
 /// Convenience function to register the rust logger with the Python logging instance.
-pub fn register() {
+pub fn register(target: &str) {
     pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
         // Extend the `logging` module to interact with log
-        setup_logging(py)
-    }).unwrap();
+        setup_logging(py, target)
+    })
+    .unwrap();
 }
-
 
 /// Consume a Python `logging.LogRecord` and emit a Rust `Log` instead.
 #[pyfunction]
-fn host_log(record: &PyAny) -> PyResult<()> {
+fn host_log(record: &PyAny, target: &str) -> PyResult<()> {
     let level = record.getattr("levelno")?;
     let message = record.getattr("getMessage")?.call0()?.to_string();
     let pathname = record.getattr("pathname")?.to_string();
@@ -27,27 +27,27 @@ fn host_log(record: &PyAny) -> PyResult<()> {
     // error
     let error_metadata = if level.ge(40u8)? {
         MetadataBuilder::new()
-            .target("angreal")
+            .target(target)
             .level(Level::Error)
             .build()
     } else if level.ge(30u8)? {
         MetadataBuilder::new()
-            .target("angreal")
+            .target(target)
             .level(Level::Warn)
             .build()
     } else if level.ge(20u8)? {
         MetadataBuilder::new()
-            .target("angreal")
+            .target(target)
             .level(Level::Info)
             .build()
     } else if level.ge(10u8)? {
         MetadataBuilder::new()
-            .target("angreal")
+            .target(target)
             .level(Level::Debug)
             .build()
     } else {
         MetadataBuilder::new()
-            .target("angreal")
+            .target(target)
             .level(Level::Trace)
             .build()
     };
@@ -66,21 +66,22 @@ fn host_log(record: &PyAny) -> PyResult<()> {
 }
 
 /// Registers the host_log function in rust as the event handler for Python's logging logger
-/// This function needs to be called from within a pyo3 context as early as possible to ensure logging messages 
-/// arrive to the rust consumer. 
-pub fn setup_logging(py: Python) -> PyResult<()> {
+/// This function needs to be called from within a pyo3 context as early as possible to ensure logging messages
+/// arrive to the rust consumer.
+pub fn setup_logging(py: Python, target: &str) -> PyResult<()> {
     let logging = py.import("logging")?;
 
     logging.setattr("host_log", wrap_pyfunction!(host_log, logging)?)?;
 
     py.run(
-        r#"
+        format!(
+            r#"
 class HostHandler(Handler):
 	def __init__(self, level=0):
 		super().__init__(level=level)
-	
+        
 	def emit(self, record):
-		host_log(record)
+		host_log(record,"{}")
 
 oldBasicConfig = basicConfig
 def basicConfig(*pargs, **kwargs):
@@ -88,6 +89,9 @@ def basicConfig(*pargs, **kwargs):
 		kwargs["handlers"] = [HostHandler()]
 	return oldBasicConfig(*pargs, **kwargs)
 "#,
+            target
+        )
+        .as_str(),
         Some(logging.dict()),
         None,
     )?;
@@ -97,5 +101,3 @@ def basicConfig(*pargs, **kwargs):
 
     Ok(())
 }
-
-

@@ -1,21 +1,24 @@
-use pyo3_pylogger;
+use log::{info, warn};
 use pyo3::prelude::*;
 
 fn main() {
-    pyo3_pylogger::register();
-    env_logger::Builder::from_env(env_logger::Env::default()
-    .default_filter_or("trace"))
-    .init();
+    // register the host handler with python logger, providing a logger target
+    pyo3_pylogger::register("example_application_py_logger");
 
-    	// Ask pyo3 to set up embedded Python interpreter
-	pyo3::prepare_freethreaded_python();
+    // initialize up a logger
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
 
-	Python::with_gil(|py|  {
-		// Python code can now `import logging` as usual
-		py.run("import logging", None, None).unwrap();
+    info!("Just some normal information!");
+    //just show the logger working from Rust.
+    warn!("Something spooky happened!");
 
-		// Log messages are forwarded to `tracing` and dealt with by the subscriber
-		py.run("logging.error('Something bad happened')", None, None).unwrap();
-
-	});
+    // Ask pyo3 to set up embedded Python interpreter
+    pyo3::prepare_freethreaded_python();
+    Python::with_gil(|py| {
+        // Python code can now `import logging` as usual
+        py.run("import logging", None, None).unwrap();
+        // Log messages are forwarded to `tracing` and dealt with by the subscriber
+        py.run("logging.error('Something bad happened')", None, None)
+            .unwrap();
+    });
 }
