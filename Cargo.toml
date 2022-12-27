@@ -8,7 +8,9 @@ publish = ["crates-io"]
 repository = ""
 license = "Apache-2.0"
 readme = "README.md"
-
+homepage = "https://github.com/dylanbstorey/pyo3-pylogger"
+repository = "https://github.com/dylanbstorey/pyo3-pylogger"
+documentation = "https://github.com/dylanbstorey/pyo3-pylogger"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

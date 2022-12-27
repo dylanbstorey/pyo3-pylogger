@@ -10,7 +10,7 @@ use pyo3-pylogger;
 pyo3-pylogger::register();
 ```
 
-Within your python application: 
+Within your python code: 
 ```python
 import logging
 
