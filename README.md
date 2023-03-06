@@ -21,19 +21,29 @@ fn main() {
     Python::with_gil(|py| {
         // Python code can now `import logging` as usual
         py.run("import logging", None, None).unwrap();
+        // The root python logger will be set to "WARNING" by default
+
+        py.run("logging.getLogger().setLevel(0)", None, None).unwrap();
+        
         // Log messages are forwarded to `log` and dealt with by the subscriber
-        py.run("logging.error('Something bad happened')", None, None)
-            .unwrap();
+        py.run("logging.debug('DEBUG')", None, None).unwrap();
+        py.run("logging.info('INFO')", None, None).unwrap();
+        py.run("logging.warning('WARNING')", None, None).unwrap();
+        py.run("logging.error('ERROR')", None, None).unwrap();
+        py.run("logging.critical('CRITICAL')", None, None).unwrap();
     });
 }
+
 ```
 
 ## Outputs
 
 ```bash
-[2022-12-27T15:26:12Z INFO  example_project] Just some normal information!
-
-[2022-12-27T15:26:12Z WARN  example_project] Something spooky happened!
-
-[2022-12-27T15:26:12Z ERROR example_application_py_logger] Something bad happened
+[2023-03-06T20:14:15Z INFO  example_project] Just some normal information!
+[2023-03-06T20:14:15Z WARN  example_project] Something spooky happened!
+[2023-03-06T20:14:15Z DEBUG example_application_py_logger] DEBUG
+[2023-03-06T20:14:15Z INFO  example_application_py_logger] INFO
+[2023-03-06T20:14:15Z WARN  example_application_py_logger] WARNING
+[2023-03-06T20:14:15Z ERROR example_application_py_logger] ERROR
+[2023-03-06T20:14:15Z ERROR example_application_py_logger] CRITICAL
 ```
