@@ -14,5 +14,5 @@ documentation = "https://github.com/dylanbstorey/pyo3-pylogger"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pyo3 = { version > "0.17" }
+pyo3 = { version = ">0.17" }
 log = { version = "0.4" }

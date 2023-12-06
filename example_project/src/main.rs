@@ -15,12 +15,13 @@ fn main() {
     Python::with_gil(|py| {
         // Python code can now `import logging` as usual
         py.run("import logging", None, None).unwrap();
-        py.run("logging.getLogger().setLevel(0)", None, None).unwrap();
+        py.run("logging.getLogger().setLevel(0)", None, None)
+            .unwrap();
         // Log messages are forwarded to `log` and dealt with by the subscriber
         py.run("logging.debug('DEBUG')", None, None).unwrap();
         py.run("logging.info('INFO')", None, None).unwrap();
 
-        // 
+        //
         py.run("logging.warning('WARNING')", None, None).unwrap();
         py.run("logging.error('ERROR')", None, None).unwrap();
         py.run("logging.critical('CRITICAL')", None, None).unwrap();

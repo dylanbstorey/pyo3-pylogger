@@ -1,6 +1,6 @@
 # pyo3-pylogger
 
-Enables log messages for pyo3 embedded Python applications using Python's `logging` module. 
+Enables log messages for pyo3 embedded Python applications using Python's `logging` module.
 
 # Usage
 ```rust
@@ -24,7 +24,7 @@ fn main() {
         // The root python logger will be set to "WARNING" by default
 
         py.run("logging.getLogger().setLevel(0)", None, None).unwrap();
-        
+
         // Log messages are forwarded to `log` and dealt with by the subscriber
         py.run("logging.debug('DEBUG')", None, None).unwrap();
         py.run("logging.info('INFO')", None, None).unwrap();
