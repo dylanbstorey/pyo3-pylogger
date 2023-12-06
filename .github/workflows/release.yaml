@@ -4,10 +4,8 @@ name: "Release"
 on:  # yamllint disable-line rule:truthy
   release:
     types: [published]
-  push:
-    branches:
-      - build**
 
+jobs:
   release-cargo:
     name: Release
     runs-on: ubuntu-latest
