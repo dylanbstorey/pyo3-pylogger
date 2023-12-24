@@ -25,5 +25,8 @@ fn main() {
         py.run("logging.warning('WARNING')", None, None).unwrap();
         py.run("logging.error('ERROR')", None, None).unwrap();
         py.run("logging.critical('CRITICAL')", None, None).unwrap();
+
+
+        py.run("logging.getLogger('foo.bar.baz').info('INFO')", None, None).unwrap();
     });
 }
