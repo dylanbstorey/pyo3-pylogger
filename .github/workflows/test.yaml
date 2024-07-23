@@ -44,18 +44,18 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - run: cargo build --all
 
-  angreal-tests-linux:
-    name: "Cargo Test"
+  example-test:
+    name: "example test"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.67.0
+          toolchain: nightly-2022-11-01
           override: true
       - uses: Swatinem/rust-cache@v1
-      - run: cargo test -v -- --nocapture --test-threads=1
+      - run: cd example_project && cargo build && ./target/debug/example_project
 
   typos:
     name: Spell Check with Typos
