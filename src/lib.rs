@@ -13,7 +13,7 @@ pub fn register(target: &str) {
 
 /// Consume a Python `logging.LogRecord` and emit a Rust `Log` instead.
 #[pyfunction]
-fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
+fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
     let level = record.getattr("levelno")?;
     let message = record.getattr("getMessage")?.call0()?.to_string();
     let pathname = record.getattr("pathname")?.to_string();
@@ -22,7 +22,7 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
         .to_string()
         .parse::<u32>()
         .unwrap();
-    
+
     let logger_name = record.getattr("name")?.to_string();
 
     let full_target: Option<String> = if logger_name.trim().is_empty() || logger_name == "root" {
@@ -30,11 +30,10 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
     } else {
         // Libraries (ex: tracing_subscriber::filter::Directive) expect rust-style targets like foo::bar,
         // and may not deal well with "." as a module separator:
-        let logger_name = logger_name.replace(".", "::");
+        let logger_name = logger_name.replace('.', "::");
         Some(format!("{rust_target}::{logger_name}"))
     };
-    let target = full_target.as_ref().map(|x| x.as_str()).unwrap_or(rust_target);
-
+    let target = full_target.as_deref().unwrap_or(rust_target);
 
     // error
     let error_metadata = if level.ge(40u8)? {
@@ -81,11 +80,11 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
 /// This function needs to be called from within a pyo3 context as early as possible to ensure logging messages
 /// arrive to the rust consumer.
 pub fn setup_logging(py: Python, target: &str) -> PyResult<()> {
-    let logging = py.import("logging")?;
+    let logging = py.import_bound("logging")?;
 
-    logging.setattr("host_log", wrap_pyfunction!(host_log, logging)?)?;
+    logging.setattr("host_log", wrap_pyfunction!(host_log, &logging)?)?;
 
-    py.run(
+    py.run_bound(
         format!(
             r#"
 class HostHandler(Handler):
@@ -104,7 +103,7 @@ def basicConfig(*pargs, **kwargs):
             target
         )
         .as_str(),
-        Some(logging.dict()),
+        Some(&logging.dict()),
         None,
     )?;
 

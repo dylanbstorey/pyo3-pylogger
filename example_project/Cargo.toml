@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 pyo3-pylogger = {path = ".." }
-pyo3 = {}
+pyo3 = { version = ">0.21" }
 log = { version = "0.4" }
 env_logger = { version = "0.9" }
