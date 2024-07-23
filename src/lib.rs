@@ -55,7 +55,7 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
             .metadata(metadata_builder.build())
             .args(format_args!("{}", &message))
             .line(Some(lineno))
-            .file(Some("app.rs"))
+            .file(Some(&pathname))
             .module_path(Some(&pathname))
             .build(),
     );
