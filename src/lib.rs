@@ -30,7 +30,7 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
     } else {
         // Libraries (ex: tracing_subscriber::filter::Directive) expect rust-style targets like foo::bar,
         // and may not deal well with "." as a module separator:
-        let logger_name = logger_name.replace(".", "::");
+        let logger_name = logger_name.replace('.', "::");
         Some(format!("{rust_target}::{logger_name}"))
     };
     let target = full_target.as_deref().unwrap_or(rust_target);
