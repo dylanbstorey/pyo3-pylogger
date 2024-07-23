@@ -22,7 +22,7 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
         .to_string()
         .parse::<u32>()
         .unwrap();
-    
+
     let logger_name = record.getattr("name")?.to_string();
 
     let full_target: Option<String> = if logger_name.trim().is_empty() || logger_name == "root" {
@@ -33,8 +33,7 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
         let logger_name = logger_name.replace(".", "::");
         Some(format!("{rust_target}::{logger_name}"))
     };
-    let target = full_target.as_ref().map(|x| x.as_str()).unwrap_or(rust_target);
-
+    let target = full_target.as_deref().unwrap_or(rust_target);
 
     // error
     let error_metadata = if level.ge(40u8)? {
