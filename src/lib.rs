@@ -36,37 +36,23 @@ fn host_log(record: &PyAny, rust_target: &str) -> PyResult<()> {
     let target = full_target.as_ref().map(|x| x.as_str()).unwrap_or(rust_target);
 
 
-    // error
-    let error_metadata = if level.ge(40u8)? {
-        MetadataBuilder::new()
-            .target(target)
-            .level(Level::Error)
-            .build()
+    let mut metadata_builder = MetadataBuilder::new();
+    metadata_builder.target(target);
+    if level.ge(40u8)? {
+        metadata_builder.level(Level::Error)
     } else if level.ge(30u8)? {
-        MetadataBuilder::new()
-            .target(target)
-            .level(Level::Warn)
-            .build()
+        metadata_builder.level(Level::Warn)
     } else if level.ge(20u8)? {
-        MetadataBuilder::new()
-            .target(target)
-            .level(Level::Info)
-            .build()
+        metadata_builder.level(Level::Info)
     } else if level.ge(10u8)? {
-        MetadataBuilder::new()
-            .target(target)
-            .level(Level::Debug)
-            .build()
+        metadata_builder.level(Level::Debug)
     } else {
-        MetadataBuilder::new()
-            .target(target)
-            .level(Level::Trace)
-            .build()
+        metadata_builder.level(Level::Trace)
     };
 
     logger().log(
         &Record::builder()
-            .metadata(error_metadata)
+            .metadata(metadata_builder.build())
             .args(format_args!("{}", &message))
             .line(Some(lineno))
             .file(Some("app.rs"))
