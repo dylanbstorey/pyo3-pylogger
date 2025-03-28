@@ -6,7 +6,7 @@
 
 use log::kv::Source;
 use pyo3::{
-    types::{PyAnyMethods, PyDict, PyDictMethods},
+    types::{PyAnyMethods, PyDict, PyDictMethods, PyListMethods},
     Bound, PyAny, PyResult,
 };
 use std::collections::HashMap;
@@ -67,12 +67,15 @@ pub fn find_kv_args<'a>(
     // We can abuse the fact that Python dictionaries are ordered by insertion order to reverse iterate over the keys
     // and stop at the first key that is not a predefined key-value pair attribute.
     let mut kv_args: Option<HashMap<String, pyo3::Bound<'_, pyo3::PyAny>>> = None;
-    for key in dict.keys().into_iter().rev() {
+
+    for item in dict.items().iter().rev() {
+        let (key, value) =
+            item.extract::<(pyo3::Bound<'_, pyo3::PyAny>, pyo3::Bound<'_, pyo3::PyAny>)>()?;
+
         let key_str = key.to_string();
         if LOG_RECORD_KV_ATTRIBUTES.contains(&key_str) {
             break;
         }
-        let value = dict.get_item(key)?.unwrap();
         if kv_args.is_none() {
             kv_args = Some(HashMap::new());
         }
