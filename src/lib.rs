@@ -1,6 +1,9 @@
 use log::{logger, Level, MetadataBuilder, Record};
 use pyo3::prelude::*;
 
+#[cfg(feature = "kv")]
+mod kv;
+
 /// Convenience function to register the rust logger with the Python logging instance.
 pub fn register(target: &str) {
     pyo3::prepare_freethreaded_python();
@@ -49,8 +52,30 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
         metadata_builder.level(Level::Trace)
     };
 
+    let mut record_builder = Record::builder();
+
+    #[cfg(feature = "kv")]
+    {
+        let kv_args = kv::find_kv_args(&record)?;
+
+        let kv_source = kv_args.map(kv::KVSource);
+        if let Some(kv_source) = kv_source {
+            logger().log(
+                &record_builder
+                    .metadata(metadata_builder.build())
+                    .args(format_args!("{}", &message))
+                    .line(Some(lineno))
+                    .file(Some(&pathname))
+                    .module_path(Some(&pathname))
+                    .key_values(&kv_source)
+                    .build(),
+            );
+            return Ok(());
+        }
+    }
+
     logger().log(
-        &Record::builder()
+        &record_builder
             .metadata(metadata_builder.build())
             .args(format_args!("{}", &message))
             .line(Some(lineno))
