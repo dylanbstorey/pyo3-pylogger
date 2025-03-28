@@ -1,3 +1,5 @@
+use std::ffi::CString;
+
 use log::{logger, Level, MetadataBuilder, Record};
 use pyo3::prelude::*;
 
@@ -91,12 +93,11 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
 /// This function needs to be called from within a pyo3 context as early as possible to ensure logging messages
 /// arrive to the rust consumer.
 pub fn setup_logging(py: Python, target: &str) -> PyResult<()> {
-    let logging = py.import_bound("logging")?;
+    let logging = py.import("logging")?;
 
     logging.setattr("host_log", wrap_pyfunction!(host_log, &logging)?)?;
 
-    py.run_bound(
-        format!(
+    let code = CString::new(format!(
             r#"
 class HostHandler(Handler):
 	def __init__(self, level=0):
@@ -112,11 +113,9 @@ def basicConfig(*pargs, **kwargs):
 	return oldBasicConfig(*pargs, **kwargs)
 "#,
             target
-        )
-        .as_str(),
-        Some(&logging.dict()),
-        None,
-    )?;
+        ))?;
+
+    py.run(&code, Some(&logging.dict()), None)?;
 
     let all = logging.index()?;
     all.append("HostHandler")?;
