@@ -98,22 +98,22 @@ pub fn setup_logging(py: Python, target: &str) -> PyResult<()> {
     logging.setattr("host_log", wrap_pyfunction!(host_log, &logging)?)?;
 
     let code = CString::new(format!(
-            r#"
+        r#"
 class HostHandler(Handler):
 	def __init__(self, level=0):
 		super().__init__(level=level)
 
-	def emit(self, record):
-		host_log(record,"{}")
+	def emit(self, record: LogRecord):
+		host_log(record, "{}")
 
 oldBasicConfig = basicConfig
 def basicConfig(*pargs, **kwargs):
-	if "handlers" not in kwargs:
-		kwargs["handlers"] = [HostHandler()]
-	return oldBasicConfig(*pargs, **kwargs)
+    if "handlers" not in kwargs:
+        kwargs["handlers"] = [HostHandler()]
+    return oldBasicConfig(*pargs, **kwargs)
 "#,
-            target
-        ))?;
+        target
+    ))?;
 
     py.run(&code, Some(&logging.dict()), None)?;
 
