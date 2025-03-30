@@ -1,5 +1,10 @@
+use std::ffi::CString;
+
 use log::{logger, Level, MetadataBuilder, Record};
 use pyo3::prelude::*;
+
+#[cfg(feature = "kv")]
+mod kv;
 
 /// Convenience function to register the rust logger with the Python logging instance.
 pub fn register(target: &str) {
@@ -49,8 +54,30 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
         metadata_builder.level(Level::Trace)
     };
 
+    let mut record_builder = Record::builder();
+
+    #[cfg(feature = "kv")]
+    {
+        let kv_args = kv::find_kv_args(&record)?;
+
+        let kv_source = kv_args.map(kv::KVSource);
+        if let Some(kv_source) = kv_source {
+            logger().log(
+                &record_builder
+                    .metadata(metadata_builder.build())
+                    .args(format_args!("{}", &message))
+                    .line(Some(lineno))
+                    .file(Some(&pathname))
+                    .module_path(Some(&pathname))
+                    .key_values(&kv_source)
+                    .build(),
+            );
+            return Ok(());
+        }
+    }
+
     logger().log(
-        &Record::builder()
+        &record_builder
             .metadata(metadata_builder.build())
             .args(format_args!("{}", &message))
             .line(Some(lineno))
@@ -66,32 +93,29 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
 /// This function needs to be called from within a pyo3 context as early as possible to ensure logging messages
 /// arrive to the rust consumer.
 pub fn setup_logging(py: Python, target: &str) -> PyResult<()> {
-    let logging = py.import_bound("logging")?;
+    let logging = py.import("logging")?;
 
     logging.setattr("host_log", wrap_pyfunction!(host_log, &logging)?)?;
 
-    py.run_bound(
-        format!(
-            r#"
+    let code = CString::new(format!(
+        r#"
 class HostHandler(Handler):
 	def __init__(self, level=0):
 		super().__init__(level=level)
 
-	def emit(self, record):
-		host_log(record,"{}")
+	def emit(self, record: LogRecord):
+		host_log(record, "{}")
 
 oldBasicConfig = basicConfig
 def basicConfig(*pargs, **kwargs):
-	if "handlers" not in kwargs:
-		kwargs["handlers"] = [HostHandler()]
-	return oldBasicConfig(*pargs, **kwargs)
+    if "handlers" not in kwargs:
+        kwargs["handlers"] = [HostHandler()]
+    return oldBasicConfig(*pargs, **kwargs)
 "#,
-            target
-        )
-        .as_str(),
-        Some(&logging.dict()),
-        None,
-    )?;
+        target
+    ))?;
+
+    py.run(&code, Some(&logging.dict()), None)?;
 
     let all = logging.index()?;
     all.append("HostHandler")?;

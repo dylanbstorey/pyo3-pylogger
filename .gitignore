@@ -1,4 +1,3 @@
-/target
-/Cargo.lock
-example_project/target/
-/.idea
+target
+Cargo.lock
+.idea

@@ -1,12 +1,12 @@
 [package]
-name = "example_project"
+name = "helloworld"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pyo3-pylogger = {path = ".." }
+pyo3-pylogger = {path = "../../" }
 pyo3 = { version = ">0.21" }
 log = { version = "0.4" }
-env_logger = { version = "0.9" }
+env_logger = { version = "0.11.7" }
