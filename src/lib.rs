@@ -97,6 +97,9 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
             //dbg!(&kv_args);
             let fields = kv_args.unwrap_or_default();
 
+            // this is the only way to pass fields to tracing, unfortunatley
+            // it's not possible as of mar 30 2025 to pass dynamic fields to tracing
+            // see: https://github.com/tokio-rs/tracing/issues/372
             match level {
                 tracing::Level::ERROR => {
                     tracing::error!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
