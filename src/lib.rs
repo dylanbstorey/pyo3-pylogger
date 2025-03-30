@@ -92,9 +92,8 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
 
         #[cfg(feature = "kv")]
         {
-            //dbg!("kv");
             let kv_args = kv::find_kv_args(&record)?;
-            //dbg!(&kv_args);
+
             let fields = kv_args.unwrap_or_default();
 
             // this is the only way to pass fields to tracing, unfortunatley
@@ -120,7 +119,6 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
         }
         #[cfg(not(feature = "kv"))]
         {
-            dbg!("no kv");
             match level {
                 tracing::Level::ERROR => {
                     tracing::event!(tracing::Level::ERROR, %target, %pathname, %lineno, "{}", message)
