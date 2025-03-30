@@ -5,6 +5,8 @@ use pyo3::prelude::*;
 #[cfg(feature = "kv")]
 mod kv;
 
+mod level;
+
 /// Convenience function to register the rust logger with the Python logging instance.
 pub fn register(target: &str) {
     pyo3::prepare_freethreaded_python();
@@ -45,17 +47,10 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
     {
         let mut metadata_builder = log::MetadataBuilder::new();
         metadata_builder.target(target);
-        if level.ge(40u8)? {
-            metadata_builder.level(log::Level::Error)
-        } else if level.ge(30u8)? {
-            metadata_builder.level(log::Level::Warn)
-        } else if level.ge(20u8)? {
-            metadata_builder.level(log::Level::Info)
-        } else if level.ge(10u8)? {
-            metadata_builder.level(log::Level::Debug)
-        } else {
-            metadata_builder.level(log::Level::Trace)
-        };
+
+        let level = crate::level::get_level(level.extract()?);
+
+        metadata_builder.level(level.0);
 
         let mut record_builder = log::Record::builder();
 
@@ -88,6 +83,59 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
                 .module_path(Some(&pathname))
                 .build(),
         );
+    }
+
+    #[cfg(feature = "tracing")]
+    {
+        // Create a new Event with the given level
+        let level = crate::level::get_level(level.extract()?).0;
+
+        #[cfg(feature = "kv")]
+        {
+            //dbg!("kv");
+            let kv_args = kv::find_kv_args(&record)?;
+            //dbg!(&kv_args);
+            let fields = kv_args.unwrap_or_default();
+
+            match level {
+                tracing::Level::ERROR => {
+                    tracing::error!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                }
+                tracing::Level::WARN => {
+                    tracing::warn!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                }
+                tracing::Level::INFO => {
+                    tracing::info!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                }
+                tracing::Level::DEBUG => {
+                    tracing::debug!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                }
+                tracing::Level::TRACE => {
+                    tracing::trace!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                }
+            }
+        }
+        #[cfg(not(feature = "kv"))]
+        {
+            dbg!("no kv");
+            match level {
+                tracing::Level::ERROR => {
+                    tracing::event!(tracing::Level::ERROR, %target, %pathname, %lineno, "{}", message)
+                }
+                tracing::Level::WARN => {
+                    tracing::event!(tracing::Level::WARN, %target, %pathname, %lineno, "{}", message)
+                }
+                tracing::Level::INFO => {
+                    tracing::event!(tracing::Level::INFO, %target, %pathname, %lineno, "{}", message)
+                }
+                tracing::Level::DEBUG => {
+                    tracing::event!(tracing::Level::DEBUG, %target, %pathname, %lineno, "{}", message)
+                }
+                tracing::Level::TRACE => {
+                    tracing::event!(tracing::Level::TRACE, %target, %pathname, %lineno, "{}", message)
+                }
+            }
+        }
     }
 
     Ok(())
