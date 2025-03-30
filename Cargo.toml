@@ -15,9 +15,14 @@ documentation = "https://github.com/dylanbstorey/pyo3-pylogger"
 
 [dependencies]
 pyo3 = { version = ">=0.21" }
-log = { version = "0.4" }
+log = { version = "0.4", optional = true }
+tracing = { version = "0.1", optional = true }
 phf = { version = "0.11", features = ["macros"] , optional = true }
 
 [features]
-default = []
-kv = ["log/kv", "phf"]
+default = ["log"]
+
+tracing = ["dep:tracing"]
+log = ["dep:log"]
+
+kv = ["log/kv", "dep:phf"]

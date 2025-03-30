@@ -1,6 +1,5 @@
 use std::ffi::CString;
 
-use log::{logger, Level, MetadataBuilder, Record};
 use pyo3::prelude::*;
 
 #[cfg(feature = "kv")]
@@ -40,51 +39,56 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
     };
     let target = full_target.as_deref().unwrap_or(rust_target);
 
-    let mut metadata_builder = MetadataBuilder::new();
-    metadata_builder.target(target);
-    if level.ge(40u8)? {
-        metadata_builder.level(Level::Error)
-    } else if level.ge(30u8)? {
-        metadata_builder.level(Level::Warn)
-    } else if level.ge(20u8)? {
-        metadata_builder.level(Level::Info)
-    } else if level.ge(10u8)? {
-        metadata_builder.level(Level::Debug)
-    } else {
-        metadata_builder.level(Level::Trace)
-    };
+    // If log feature is enabled, use log::logger
 
-    let mut record_builder = Record::builder();
-
-    #[cfg(feature = "kv")]
+    #[cfg(feature = "log")]
     {
-        let kv_args = kv::find_kv_args(&record)?;
+        let mut metadata_builder = log::MetadataBuilder::new();
+        metadata_builder.target(target);
+        if level.ge(40u8)? {
+            metadata_builder.level(log::Level::Error)
+        } else if level.ge(30u8)? {
+            metadata_builder.level(log::Level::Warn)
+        } else if level.ge(20u8)? {
+            metadata_builder.level(log::Level::Info)
+        } else if level.ge(10u8)? {
+            metadata_builder.level(log::Level::Debug)
+        } else {
+            metadata_builder.level(log::Level::Trace)
+        };
 
-        let kv_source = kv_args.map(kv::KVSource);
-        if let Some(kv_source) = kv_source {
-            logger().log(
-                &record_builder
-                    .metadata(metadata_builder.build())
-                    .args(format_args!("{}", &message))
-                    .line(Some(lineno))
-                    .file(Some(&pathname))
-                    .module_path(Some(&pathname))
-                    .key_values(&kv_source)
-                    .build(),
-            );
-            return Ok(());
+        let mut record_builder = log::Record::builder();
+
+        #[cfg(feature = "kv")]
+        {
+            let kv_args = kv::find_kv_args(&record)?;
+
+            let kv_source = kv_args.map(kv::KVSource);
+            if let Some(kv_source) = kv_source {
+                log::logger().log(
+                    &record_builder
+                        .metadata(metadata_builder.build())
+                        .args(format_args!("{}", &message))
+                        .line(Some(lineno))
+                        .file(Some(&pathname))
+                        .module_path(Some(&pathname))
+                        .key_values(&kv_source)
+                        .build(),
+                );
+                return Ok(());
+            }
         }
-    }
 
-    logger().log(
-        &record_builder
-            .metadata(metadata_builder.build())
-            .args(format_args!("{}", &message))
-            .line(Some(lineno))
-            .file(Some(&pathname))
-            .module_path(Some(&pathname))
-            .build(),
-    );
+        log::logger().log(
+            &record_builder
+                .metadata(metadata_builder.build())
+                .args(format_args!("{}", &message))
+                .line(Some(lineno))
+                .file(Some(&pathname))
+                .module_path(Some(&pathname))
+                .build(),
+        );
+    }
 
     Ok(())
 }
