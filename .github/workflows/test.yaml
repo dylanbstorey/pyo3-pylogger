@@ -24,7 +24,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-11-01
+          toolchain: nightly
           override: true
           components: rustfmt, clippy
       - uses: pre-commit/action@v3.0.0
@@ -52,7 +52,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-11-01
+          toolchain: nightly
           override: true
       - uses: Swatinem/rust-cache@v1
       - run: cd examples/helloworld/ && cargo build && ./target/debug/helloworld
@@ -65,7 +65,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-11-01
+          toolchain: nightly
           override: true
       - uses: Swatinem/rust-cache@v1
       - run: cd examples/keyvalue/ && cargo build && ./target/debug/keyvalue
