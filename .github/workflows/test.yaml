@@ -57,7 +57,7 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - run: cd examples/helloworld/ && cargo build && ./target/debug/helloworld
   
-    keyvalue-example:
+  keyvalue-example:
     name: "keyvalue example"
     runs-on: ubuntu-latest
     steps:
