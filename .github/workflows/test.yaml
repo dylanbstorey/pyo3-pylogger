@@ -44,8 +44,8 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - run: cargo build --all
 
-  example-test:
-    name: "example test"
+  helloworld-example:
+    name: "helloworld example"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -55,7 +55,20 @@ jobs:
           toolchain: nightly-2022-11-01
           override: true
       - uses: Swatinem/rust-cache@v1
-      - run: cd example_project && cargo build && ./target/debug/example_project
+      - run: cd examples/helloworld/ && cargo build && ./target/debug/helloworld
+  
+    keyvalue-example:
+    name: "keyvalue example"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2022-11-01
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - run: cd examples/keyvalue/ && cargo build && ./target/debug/keyvalue
 
   typos:
     name: Spell Check with Typos
