@@ -94,26 +94,53 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
         {
             let kv_args = kv::find_kv_args(&record)?;
 
-            let fields = kv_args.unwrap_or_default();
+            let fields: std::collections::HashMap<String, Bound<'_, PyAny>> =
+                kv_args.unwrap_or_default();
 
             // this is the only way to pass fields to tracing, unfortunatley
             // it's not possible as of mar 30 2025 to pass dynamic fields to tracing
             // see: https://github.com/tokio-rs/tracing/issues/372
+            // Convert Python dictionary to a Rust value that can be serialized to JSON
+            let mut json_map = serde_json::Map::new();
+
+            // Convert each Python object in the HashMap to a JSON value
+            for (key, value) in fields.into_iter() {
+                let fallback = format!("{:?}", &value);
+                match serde_pyobject::from_pyobject(value) {
+                    Ok(json_value) => {
+                        json_map.insert(key.clone(), json_value);
+                    }
+                    Err(e) => {
+                        tracing::error!("Error converting Python object to JSON: {:?}", e);
+                        // Handle conversion errors (optional)
+                        // Supported types: https://github.com/Jij-Inc/serde-pyobject/blob/32c3ac77c2ed09b654f7fbc960c5f273fd1bb85c/src/de.rs#L305
+                        json_map.insert(
+                            key.clone(),
+                            serde_json::Value::String(format!("{:?}", fallback)),
+                        );
+                    }
+                }
+            }
+
+            // Create a JSON object from our map and convert to string
+            let json_value = serde_json::Value::Object(json_map);
+            let fields = serde_json::to_string(&json_value).unwrap_or_default();
+
             match level {
                 tracing::Level::ERROR => {
-                    tracing::error!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                    tracing::error!(%target, %pathname, %lineno, python_fields = %fields, "{}", message )
                 }
                 tracing::Level::WARN => {
-                    tracing::warn!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                    tracing::warn!(%target, %pathname, %lineno, python_fields = %fields, "{}", message )
                 }
                 tracing::Level::INFO => {
-                    tracing::info!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                    tracing::info!(%target, %pathname, %lineno, python_fields = %fields, "{}", message )
                 }
                 tracing::Level::DEBUG => {
-                    tracing::debug!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                    tracing::debug!(%target, %pathname, %lineno, python_fields = %fields, "{}", message )
                 }
                 tracing::Level::TRACE => {
-                    tracing::trace!(%target, %pathname, %lineno, python_fields = ?fields, "{}", message )
+                    tracing::trace!(%target, %pathname, %lineno, python_fields = %fields, "{}", message )
                 }
             }
         }
