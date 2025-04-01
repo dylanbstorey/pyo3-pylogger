@@ -1,10 +1,10 @@
 use pyo3::{ffi::c_str, prelude::*};
 use tracing::metadata::LevelFilter;
 use tracing::{info, warn};
-use tracing_subscriber::Layer;
 use tracing_subscriber::filter::filter_fn;
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::Layer;
 fn main() {
     // register the host handler with python logger, providing a logger target
     let standard_layer = tracing_logfmt::builder()
@@ -60,6 +60,13 @@ logging.warning('WARNING', extra={'some_list': ['a', 'b', 'c']})
 logging.error('ERROR', extra={'some_int': 42})
 logging.critical('CRITICAL', extra={'some_float': 3.14, 4: 'four'})
 logging.info('INFO', extra={'session_id': '1234567890', 'log.device_id': 'device_1234567890', 'location_id': '54', 'time_elapsed': 1234567890})
+
+class MyClass:
+    def __init__(self, name: str, age: int):
+        self.name = name
+        self.age = age
+
+logging.info('INFO', extra={'my_class': MyClass('John', 30)})
             "#
             ),
             None,
