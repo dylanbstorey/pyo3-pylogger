@@ -2,6 +2,15 @@ use std::ffi::CString;
 
 use pyo3::prelude::*;
 
+#[cfg(all(feature = "tracing", feature = "log"))]
+compile_error!("The features 'tracing' and 'log' cannot be enabled at the same time. Please choose one logging implementation.");
+
+#[cfg(all(feature = "tracing", feature = "kv"))]
+compile_error!("The features 'tracing' and 'kv' cannot be enabled at the same time. Please tracing and tracing-kv features instead.");
+
+#[cfg(all(feature = "log", feature = "tracing-kv"))]
+compile_error!("The features 'log' and 'tracing-kv' cannot be enabled at the same time. Please log and kv features instead.");
+
 #[cfg(feature = "kv-common")]
 mod kv;
 
