@@ -64,7 +64,7 @@ To enable structured logging support, add the `kv` feature to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pyo3-pylogger = { version = "0.3", features = ["kv"] }
+pyo3-pylogger = { version = "0.4", features = ["kv"] }
 ```
 
 Then you can use Python's `extra` parameter to pass structured data:
@@ -84,7 +84,7 @@ To enable integration with Rust's `tracing` library, add the `tracing` feature t
 
 ```toml
 [dependencies]
-pyo3-pylogger = { version = "0.3", default-features = false, features = ["tracing"] }
+pyo3-pylogger = { version = "0.4", default-features = false, features = ["tracing"] }
 ```
 
 When the `tracing` feature is enabled, Python logs will be forwarded to the active tracing subscriber:
