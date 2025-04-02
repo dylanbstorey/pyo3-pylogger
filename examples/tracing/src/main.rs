@@ -15,8 +15,7 @@ fn main() {
         .layer()
         // Only apply this layer if the target is NOT pyo3_logger
         .with_filter(filter_fn(|metadata| {
-            metadata.target() != "pyo3_pylogger"
-                && metadata.target() != "example_application_py_logger"
+            metadata.target() != "pyo3_pylogger" && metadata.target() != "tracing"
         }));
 
     // Layer specifically for pyo3_logger targets - omits location and module_path
@@ -28,8 +27,7 @@ fn main() {
         .layer()
         // Only apply this layer if the target IS pyo3_logger
         .with_filter(filter_fn(|metadata| {
-            metadata.target() == "pyo3_pylogger"
-                || metadata.target() == "example_application_py_logger"
+            metadata.target() == "pyo3_pylogger" || metadata.target() == "tracing"
         }));
 
     tracing_subscriber::registry()
@@ -54,20 +52,12 @@ fn main() {
                 r#"
 import logging
 logging.getLogger().setLevel(0)
-logging.debug('DEBUG', extra={'some_key': 'some_value'})
-logging.info('INFO', extra={'some_dict': {'a': 'b', 'c': 'd'}})
-logging.warning('WARNING', extra={'some_list': ['a', 'b', 'c']})
-logging.error('ERROR', extra={'some_int': 42})
-logging.critical('CRITICAL', extra={'some_float': 3.14, 4: 'four'})
-logging.info('INFO', extra={'session_id': '1234567890', 'log.device_id': 'device_1234567890', 'location_id': '54', 'time_elapsed': 1234567890})
+logging.debug('DEBUG')
+logging.info('INFO')
+logging.warning('WARNING')
+logging.error('ERROR')
+logging.critical('CRITICAL')
 
-# Need https://github.com/Jij-Inc/serde-pyobject/pull/22 merged to support this
-#class MyClass:
-#    def __init__(self, name: str, age: int):
-#        self.name = name
-#        self.age = age
-#
-#logging.info('INFO', extra={'my_class': MyClass('John', 30)})
             "#
             ),
             None,
