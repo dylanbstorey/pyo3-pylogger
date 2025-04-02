@@ -42,6 +42,6 @@ tracing = ["dep:tracing", "dep:tracing-core"]
 log = ["dep:log"]
 
 # KV support that works with either logging implementation
-kv = ["dep:phf"]
-log-kv = ["log", "kv", "log/kv"]
-tracing-kv = ["tracing", "kv",  "pyo3/serde", "dep:serde_json", "dep:serde-pyobject"]
+kv-common = ["dep:phf"]
+kv = ["log", "kv-common", "log/kv"]
+tracing-kv = ["tracing", "kv-common",  "pyo3/serde", "dep:serde_json", "dep:serde-pyobject"]

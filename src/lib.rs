@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use pyo3::prelude::*;
 
-#[cfg(feature = "kv")]
+#[cfg(feature = "kv-common")]
 mod kv;
 
 mod level;
@@ -99,7 +99,7 @@ fn handle_record(
 
     #[cfg(feature = "tracing")]
     {
-        #[cfg(feature = "kv")]
+        #[cfg(feature = "kv-common")]
         {
             let kv_args = kv::find_kv_args(&record)?;
 
@@ -153,7 +153,7 @@ fn handle_record(
                 }
             }
         }
-        #[cfg(not(feature = "kv"))]
+        #[cfg(not(feature = "kv-common"))]
         {
             match level {
                 tracing::Level::ERROR => {
