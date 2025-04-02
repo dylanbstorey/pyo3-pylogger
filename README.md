@@ -84,7 +84,7 @@ To enable integration with Rust's `tracing` library, add the `tracing` feature t
 
 ```toml
 [dependencies]
-pyo3-pylogger = { version = "0.3", features = ["tracing"] }
+pyo3-pylogger = { version = "0.3", default-features = false, features = ["tracing"] }
 ```
 
 When the `tracing` feature is enabled, Python logs will be forwarded to the active tracing subscriber:
