@@ -35,7 +35,7 @@ serde-pyobject = { git = "https://github.com/LockedThread/serde-pyobject", branc
 
 
 [features]
-default = ["tracing", "tracing-kv"]
+default = ["log"]
 
 # Base features
 tracing = ["dep:tracing", "dep:tracing-core"]
