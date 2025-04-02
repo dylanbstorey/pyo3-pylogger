@@ -20,7 +20,7 @@ pub fn register(target: &str) {
 /// Consume a Python `logging.LogRecord` and emit a Rust `Log` instead.
 #[pyfunction]
 fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
-    let level = record.getattr("levelno")?;
+    let level = record.getattr("levelno")?.extract()?;
     let message = record.getattr("getMessage")?.call0()?.to_string();
     let pathname = record.getattr("pathname")?.to_string();
     let lineno = record
@@ -41,16 +41,28 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
     };
     let target = full_target.as_deref().unwrap_or(rust_target);
 
+    handle_record(record, target, &message, lineno, &pathname, level)?;
+
+    Ok(())
+}
+
+fn handle_record(
+    #[allow(unused_variables)] record: Bound<'_, PyAny>,
+    target: &str,
+    message: &str,
+    lineno: u32,
+    pathname: &str,
+    level: u8,
+) -> PyResult<()> {
     // If log feature is enabled, use log::logger
+    let level = crate::level::get_level(level).0;
 
     #[cfg(feature = "log")]
     {
         let mut metadata_builder = log::MetadataBuilder::new();
         metadata_builder.target(target);
 
-        let level = crate::level::get_level(level.extract()?);
-
-        metadata_builder.level(level.0);
+        metadata_builder.level(level);
 
         let mut record_builder = log::Record::builder();
 
@@ -65,8 +77,8 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
                         .metadata(metadata_builder.build())
                         .args(format_args!("{}", &message))
                         .line(Some(lineno))
-                        .file(Some(&pathname))
-                        .module_path(Some(&pathname))
+                        .file(Some(pathname))
+                        .module_path(Some(pathname))
                         .key_values(&kv_source)
                         .build(),
                 );
@@ -79,17 +91,14 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
                 .metadata(metadata_builder.build())
                 .args(format_args!("{}", &message))
                 .line(Some(lineno))
-                .file(Some(&pathname))
-                .module_path(Some(&pathname))
+                .file(Some(pathname))
+                .module_path(Some(pathname))
                 .build(),
         );
     }
 
     #[cfg(feature = "tracing")]
     {
-        // Create a new Event with the given level
-        let level = crate::level::get_level(level.extract()?).0;
-
         #[cfg(feature = "kv")]
         {
             let kv_args = kv::find_kv_args(&record)?;
@@ -165,7 +174,6 @@ fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
             }
         }
     }
-
     Ok(())
 }
 
