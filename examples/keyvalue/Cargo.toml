@@ -5,6 +5,6 @@ edition = "2024"
 
 [dependencies]
 pyo3-pylogger = {path = "../../", features = ["kv"]}
-pyo3 = { version = ">0.21" }
+pyo3 = { version = ">0.23" }
 log = { version = "0.4" }
 env_logger = { version = "0.11.7", features = ["unstable-kv"] }
