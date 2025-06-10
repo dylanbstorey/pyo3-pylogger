@@ -129,7 +129,7 @@ fn handle_record(
                         json_map.insert(key.clone(), json_value);
                     }
                     Err(e) => {
-                        tracing::error!("Error converting Python object to JSON: {:?}", e);
+                        tracing::error!("Error converting Python object to JSON when parsing key={} with message='{}' : {:?}", e, key.clone(), message);
                         // Handle conversion errors (optional)
                         // Supported types: https://github.com/Jij-Inc/serde-pyobject/blob/32c3ac77c2ed09b654f7fbc960c5f273fd1bb85c/src/de.rs#L305
                         json_map.insert(
