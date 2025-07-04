@@ -1,0 +1,14 @@
+[package]
+name = "tracing_keyvalue"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+pyo3-pylogger = {path = "../../", default-features = false, features = ["tracing", "tracing-kv"]}
+pyo3 = { version = ">=0.23" }
+tracing-logfmt = "0.3.5"
+tracing = "0.1.41"
+tracing-subscriber = { version = '0.3.18', features = [
+	'tracing',
+	'tracing-log',
+] }

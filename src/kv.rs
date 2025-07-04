@@ -4,7 +4,6 @@
 //! from Python LogRecord objects, facilitating integration between Python's logging
 //! system and Rust's log crate.
 
-use log::kv::Source;
 use pyo3::{
     types::{PyAnyMethods, PyDict, PyDictMethods, PyListMethods},
     Bound, PyAny, PyResult,
@@ -93,9 +92,11 @@ pub fn find_kv_args<'a>(
 ///
 /// # Type Parameters
 /// * `'a` - The lifetime of the contained Python values
+#[cfg(feature = "log")]
 pub struct KVSource<'a>(pub HashMap<String, pyo3::Bound<'a, pyo3::PyAny>>);
 
-impl Source for KVSource<'_> {
+#[cfg(feature = "log")]
+impl log::kv::Source for KVSource<'_> {
     /// Visits each key-value pair in the source, converting Python values to debug representations.
     ///
     /// # Arguments
