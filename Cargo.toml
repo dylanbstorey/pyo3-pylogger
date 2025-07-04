@@ -22,16 +22,7 @@ phf = { version = "0.11", features = ["macros"] , optional = true }
 
 serde_json = { version = "1.0.140", optional = true }
 
-# serde-pyobject currently has too strict of a version constraint which makes it incompatible with our library.
-# We are waiting on a PR to be merged which will fix this.
-#
-# https://github.com/Jij-Inc/serde-pyobject/pull/21
-#
-# Additionally, I have 2 other PRs open which will add additional features such as support for Pydantic BaseModels, dataclasses, and more.
-#
-# https://github.com/Jij-Inc/serde-pyobject/pull/22
-# https://github.com/Jij-Inc/serde-pyobject/pull/23
-serde-pyobject = { git = "https://github.com/LockedThread/serde-pyobject", branch = "feat/loosen-deps", optional = true }
+pythonize = { version = "0.23", optional = true }
 
 
 [features]
@@ -44,4 +35,4 @@ log = ["dep:log"]
 # KV support that works with either logging implementation
 kv-common = ["dep:phf"]
 kv = ["log", "kv-common", "log/kv"]
-tracing-kv = ["tracing", "kv-common",  "pyo3/serde", "dep:serde_json", "dep:serde-pyobject"]
+tracing-kv = ["tracing", "kv-common",  "pyo3/serde", "dep:serde_json", "dep:pythonize"]

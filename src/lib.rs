@@ -31,14 +31,10 @@ pub fn register(target: &str) {
 fn host_log(record: Bound<'_, PyAny>, rust_target: &str) -> PyResult<()> {
     let level = record.getattr("levelno")?.extract()?;
     let message = record.getattr("getMessage")?.call0()?.to_string();
-    let pathname = record.getattr("pathname")?.to_string();
-    let lineno = record
-        .getattr("lineno")?
-        .to_string()
-        .parse::<u32>()
-        .unwrap();
+    let pathname = record.getattr("pathname")?.extract::<String>()?;
+    let lineno = record.getattr("lineno")?.extract::<u32>()?;
 
-    let logger_name = record.getattr("name")?.to_string();
+    let logger_name = record.getattr("name")?.extract::<String>()?;
 
     let full_target: Option<String> = if logger_name.trim().is_empty() || logger_name == "root" {
         None
@@ -124,7 +120,7 @@ fn handle_record(
             // Convert each Python object in the HashMap to a JSON value
             for (key, value) in fields.into_iter() {
                 let fallback = format!("{:?}", &value);
-                match serde_pyobject::from_pyobject(value) {
+                match pythonize::depythonize::<serde_json::Value>(&value) {
                     Ok(json_value) => {
                         json_map.insert(key.clone(), json_value);
                     }
