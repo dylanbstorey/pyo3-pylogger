@@ -115,7 +115,7 @@ fn handle_record(
             let fields: std::collections::HashMap<String, Bound<'_, PyAny>> =
                 kv_args.unwrap_or_default();
 
-            // this is the only way to pass fields to tracing, unfortunatley
+            // this is the only way to pass fields to tracing, unfortunately
             // it's not possible as of mar 30 2025 to pass dynamic fields to tracing
             // see: https://github.com/tokio-rs/tracing/issues/372
             // Convert Python dictionary to a Rust value that can be serialized to JSON

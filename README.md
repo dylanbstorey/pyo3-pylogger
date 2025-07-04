@@ -99,10 +99,10 @@ fn main() {
 
     // Initialize tracing subscriber
     tracing_subscriber::fmt::init();
-    
+
     // Tracing events from Rust
     info!("Tracing information from Rust");
-    
+
     // Python logging will be captured by the tracing subscriber
     pyo3::prepare_freethreaded_python();
     Python::with_gil(|py| {
@@ -130,4 +130,3 @@ The `tracing` feature automatically supports Python's `extra` field for structur
 - `kv`: Enables structured logging support via Python's `extra` fields. This adds support for the `log` crate's key-value system.
 - `tracing`: Enables integration with Rust's `tracing` library.
 - `tracing-kv`: Enables structured logging support via Python's `extra` fields and integration with Rust's `tracing` library.
-
