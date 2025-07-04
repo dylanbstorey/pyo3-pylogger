@@ -194,6 +194,7 @@ pub fn setup_logging(py: Python, target: &str) -> PyResult<()> {
 
     logging.setattr("host_log", wrap_pyfunction!(host_log, &logging)?)?;
 
+    #[allow(clippy::uninlined_format_args)]
     let code = CString::new(format!(
         r#"
 class HostHandler(Handler):
