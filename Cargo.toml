@@ -1,6 +1,6 @@
 [package]
 name = "pyo3-pylogger"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 authors = ["Dylan Bobby Storey <dylan.storey@gmail.com>", "cpu <daniel@binaryparadox.net>" , "Warren Snipes <contact@warrensnipes.dev>"]
 description = "Enables `log` for pyo3 based Rust applications using the `logging` modules."
