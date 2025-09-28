@@ -18,8 +18,7 @@ mod level;
 
 /// Convenience function to register the rust logger with the Python logging instance.
 pub fn register(target: &str) {
-    pyo3::prepare_freethreaded_python();
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         // Extend the `logging` module to interact with log
         setup_logging(py, target)
     })
