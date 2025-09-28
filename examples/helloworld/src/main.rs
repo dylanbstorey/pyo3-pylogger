@@ -27,5 +27,6 @@ logging.getLogger('foo.bar.baz').info('INFO')"#
             None,
             None,
         )
-    }).unwrap()
+    })
+    .unwrap()
 }

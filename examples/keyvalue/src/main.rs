@@ -32,5 +32,6 @@ logging.critical('CRITICAL', extra={'some_float': 3.14, 4: 'four'})
             None,
             None,
         )
-    }).unwrap()
+    })
+    .unwrap()
 }
