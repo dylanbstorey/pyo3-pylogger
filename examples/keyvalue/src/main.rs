@@ -15,8 +15,7 @@ fn main() {
     warn!("Something spooky happened!");
 
     // Ask pyo3 to set up embedded Python interpreter
-    pyo3::prepare_freethreaded_python();
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         // Python code can now `import logging` as usual
         py.run(
             c_str!(
@@ -33,6 +32,5 @@ logging.critical('CRITICAL', extra={'some_float': 3.14, 4: 'four'})
             None,
             None,
         )
-        .unwrap();
-    })
+    }).unwrap()
 }
