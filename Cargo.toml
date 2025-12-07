@@ -1,6 +1,6 @@
 [package]
 name = "pyo3-pylogger"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2021"
 authors = ["Dylan Bobby Storey <dylan.storey@gmail.com>", "cpu <daniel@binaryparadox.net>" , "Warren Snipes <contact@warrensnipes.dev>"]
 description = "Enables `log` for pyo3 based Rust applications using the `logging` modules."
@@ -14,7 +14,7 @@ documentation = "https://github.com/dylanbstorey/pyo3-pylogger"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pyo3 = { version = ">=0.23" }
+pyo3 = { version = ">=0.26" }
 log = { version = "0.4", optional = true }
 tracing = { version = "0.1", optional = true }
 tracing-core = { version = "0.1", optional = true }
